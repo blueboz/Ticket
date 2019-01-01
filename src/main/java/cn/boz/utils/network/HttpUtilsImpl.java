@@ -7,10 +7,13 @@ import org.slf4j.LoggerFactory;
 import java.io.IOException;
 import java.net.URI;
 import java.net.http.HttpClient;
+import java.net.http.HttpHeaders;
 import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
+import java.nio.charset.Charset;
 import java.time.Duration;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 /**
@@ -49,7 +52,18 @@ public final class HttpUtilsImpl implements HttpUtils{
                 .header("Content-Type","application/x-www-form-urlencoded")
                 .POST(HttpRequest.BodyPublishers.ofString(param))
                 .build();
-        HttpResponse<String> rst = httpClient.send(request, HttpResponse.BodyHandlers.ofString());
+        HttpResponse<String> rst = httpClient.send(request, new HttpResponse.BodyHandler<String>() {
+            @Override
+            public HttpResponse.BodySubscriber<String> apply(HttpResponse.ResponseInfo responseInfo) {
+                HttpHeaders headers = responseInfo.headers();
+                Map<String, List<String>> map = headers.map();
+                map.forEach((k,v)->{
+                    System.out.println(k+":"+v);
+                });
+                return HttpResponse.BodySubscribers.ofString(Charset.defaultCharset());
+            }
+        });
+        //HttpResponse<String> rst = httpClient.send(request, HttpResponse.BodyHandlers.ofString());
         return rst.body();
     }
 
