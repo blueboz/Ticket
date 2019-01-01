@@ -1,5 +1,8 @@
 package cn.boz.utils.network;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import java.io.IOException;
 import java.net.URI;
 import java.net.http.HttpClient;
@@ -9,7 +12,12 @@ import java.time.Duration;
 import java.util.HashMap;
 import java.util.Map;
 
+/**
+ * 网络工具
+ */
 public final class HttpUtilsImpl implements HttpUtils{
+
+    private static Logger logger = LoggerFactory.getLogger(HttpUtilsImpl.class);
 
     public static  HttpUtils INST=new HttpUtilsImpl();
 
