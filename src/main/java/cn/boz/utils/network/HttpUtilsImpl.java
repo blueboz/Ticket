@@ -41,34 +41,67 @@ public final class HttpUtilsImpl implements HttpUtils{
 
     @Override
     public String post(String url, Map<String, String> params) {
+        HttpRequest request = HttpRequest.newBuilder()
+                .uri(URI.create(url))
+                .POST(HttpRequest.BodyPublishers.ofString(genFormParams(params)))
+                .build();
         return null;
     }
 
     public String post(String url,Object obj){
+
         return "";
     }
 
+    /**
+     * 不带参数的get请求
+     * @param url 目标url
+     * @return
+     * @throws IOException
+     * @throws InterruptedException
+     */
     @Override
     public String get(String url) throws IOException, InterruptedException {
         return get(url,new HashMap<>());
     }
 
+    /**
+     * get请求
+     * @param url 目标url
+     * @param params 请求参数
+     * @return
+     * @throws IOException
+     * @throws InterruptedException
+     */
     @Override
     public String get(String url, Map<String, String> params) throws IOException, InterruptedException {
-        if(params!=null&&!params.isEmpty()){
-            StringBuilder sb = new StringBuilder();
-            sb.append("?");
-            params.forEach((k,v)->{
-                sb.append(k+"="+v+"&");
-            });
-            sb.deleteCharAt(sb.length()-1);
-            url+=sb.toString();
-
+        String s = genFormParams(params);
+        if(!s.isEmpty()){
+            url+="?"+s;
         }
+        logger.debug("full url is =>"+url);
         HttpRequest request = HttpRequest.newBuilder()
                 .uri(URI.create(url))
                 .build();
         HttpResponse<String> send = httpClient.send(request,HttpResponse.BodyHandlers.ofString());
         return send.body();
+    }
+
+    /**
+     * 得到form 表单样式的参数
+     * @param params 参数map
+     * @return 字符串
+     */
+    private String genFormParams(Map<String,String> params){
+        StringBuilder sb = new StringBuilder();
+        if(params!=null&&!params.isEmpty()){
+            params.forEach((k,v)->{
+                sb.append(k+"="+v+"&");
+            });
+            sb.deleteCharAt(sb.length()-1);
+            url+=sb.toString();
+            logger.debug("url params is"+sb.toString());
+        }
+        return sb.toString();
     }
 }
