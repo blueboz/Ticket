@@ -4,7 +4,7 @@ import org.junit.Test
 
 class  NetWork{
     @Test
-    fun test(){
+    fun testGet(){
         val  params = mapOf("username" to "jay")
         val inst = HttpUtilsImpl.getINST()
         val rst = inst.get("http://www.baidu.com",params)

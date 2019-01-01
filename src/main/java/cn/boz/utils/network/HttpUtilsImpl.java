@@ -1,5 +1,6 @@
 package cn.boz.utils.network;
 
+import com.alibaba.fastjson.JSON;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -35,22 +36,41 @@ public final class HttpUtilsImpl implements HttpUtils{
     }
 
     @Override
-    public String post(String url) {
+    public String post(String url) throws IOException, InterruptedException {
         return post(url,new HashMap<>());
     }
 
     @Override
-    public String post(String url, Map<String, String> params) {
+    public String post(String url, Map<String, String> params) throws IOException, InterruptedException {
+        String param = genFormParams(params);
+        logger.debug("params is"+param);
         HttpRequest request = HttpRequest.newBuilder()
                 .uri(URI.create(url))
-                .POST(HttpRequest.BodyPublishers.ofString(genFormParams(params)))
+                .header("Content-Type","application/x-www-form-urlencoded")
+                .POST(HttpRequest.BodyPublishers.ofString(param))
                 .build();
-        return null;
+        HttpResponse<String> rst = httpClient.send(request, HttpResponse.BodyHandlers.ofString());
+        return rst.body();
     }
 
-    public String post(String url,Object obj){
-
-        return "";
+    /**
+     * 按照json格式的post请求
+     * @param url
+     * @param obj
+     * @return
+     * @throws IOException
+     * @throws InterruptedException
+     */
+    public String post(String url,Object obj) throws IOException, InterruptedException {
+        String json = JSON.toJSONString(obj);
+        logger.debug("json is "+json);
+        HttpRequest request = HttpRequest.newBuilder()
+                .uri(URI.create(url))
+                .header("Content-Type","application/json")
+                .POST(HttpRequest.BodyPublishers.ofString(json))
+                .build();
+        HttpResponse<String> rst = httpClient.send(request, HttpResponse.BodyHandlers.ofString());
+        return rst.body();
     }
 
     /**
