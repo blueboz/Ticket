@@ -99,7 +99,6 @@ public final class HttpUtilsImpl implements HttpUtils{
                 sb.append(k+"="+v+"&");
             });
             sb.deleteCharAt(sb.length()-1);
-            url+=sb.toString();
             logger.debug("url params is"+sb.toString());
         }
         return sb.toString();
