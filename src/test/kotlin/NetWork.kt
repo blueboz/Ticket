@@ -18,4 +18,17 @@ class  NetWork{
         val rst = inst.post("https://kyfw.12306.cn/passport/web/checkqr",params)
         println(rst)
     }
+
+    @Test
+    fun tryLoginLiangChengyun(){
+        val loginUrl="https://xn--9kq677j3ki.app/auth/login";
+        val checkinUrl="https://xn--9kq677j3ki.app/user/checkin";
+        val params = mapOf("email" to "1173626291@qq.com", "passwd" to "1173626291", "code" to "")
+        val inst = HttpUtilsImpl.getINST()
+        val resp = inst.post(loginUrl, params)
+        println(resp)
+        val resp2 = inst.post(checkinUrl)
+        println()
+        println(resp2)
+    }
 }

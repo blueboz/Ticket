@@ -5,9 +5,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
-import java.net.URI;
+import java.net.*;
 import java.net.http.HttpClient;
-import java.net.http.HttpHeaders;
 import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
 import java.nio.charset.Charset;
@@ -27,9 +26,13 @@ public final class HttpUtilsImpl implements HttpUtils{
 
     private HttpClient httpClient;
 
+    private CookieManager cookieManager;
     private HttpUtilsImpl(){
+        cookieManager = new CookieManager();
+        cookieManager.setCookiePolicy(CookiePolicy.ACCEPT_ALL);
         httpClient = HttpClient.newBuilder()
                 .connectTimeout(Duration.ofMillis(5000))
+                .cookieHandler(cookieManager)
                 .followRedirects(HttpClient.Redirect.NORMAL)
                 .build();
     }
@@ -45,6 +48,8 @@ public final class HttpUtilsImpl implements HttpUtils{
 
     @Override
     public String post(String url, Map<String, String> params) throws IOException, InterruptedException {
+        List<HttpCookie> cookies = cookieManager.getCookieStore().getCookies();
+        cookies.forEach(System.out::println);
         String param = genFormParams(params);
         logger.debug("params is"+param);
         HttpRequest request = HttpRequest.newBuilder()
@@ -55,11 +60,7 @@ public final class HttpUtilsImpl implements HttpUtils{
         HttpResponse<String> rst = httpClient.send(request, new HttpResponse.BodyHandler<String>() {
             @Override
             public HttpResponse.BodySubscriber<String> apply(HttpResponse.ResponseInfo responseInfo) {
-                HttpHeaders headers = responseInfo.headers();
-                Map<String, List<String>> map = headers.map();
-                map.forEach((k,v)->{
-                    System.out.println(k+":"+v);
-                });
+
                 return HttpResponse.BodySubscribers.ofString(Charset.defaultCharset());
             }
         });
@@ -76,6 +77,7 @@ public final class HttpUtilsImpl implements HttpUtils{
      * @throws InterruptedException
      */
     public String post(String url,Object obj) throws IOException, InterruptedException {
+
         String json = JSON.toJSONString(obj);
         logger.debug("json is "+json);
         HttpRequest request = HttpRequest.newBuilder()
@@ -83,6 +85,7 @@ public final class HttpUtilsImpl implements HttpUtils{
                 .header("Content-Type","application/json")
                 .POST(HttpRequest.BodyPublishers.ofString(json))
                 .build();
+
         HttpResponse<String> rst = httpClient.send(request, HttpResponse.BodyHandlers.ofString());
         return rst.body();
     }
